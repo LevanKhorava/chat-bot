@@ -3,46 +3,36 @@ import { useTranslation } from "react-i18next";
 
 type Country = "georgia" | "italy";
 
-// Value passed to the CX agent's "country" session parameter.
+// Value passed to the CX agent's "country" variable.
 const COUNTRY_VALUES: Record<Country, string> = {
   georgia: "Georgia",
   italy: "Italy",
 };
 
-type QueryParameters = {
-  parameters?: Record<string, unknown>;
-  [key: string]: unknown;
-};
+type Variables = Record<string, unknown>;
 
 type ChatMessengerElement = HTMLElement & {
-  setQueryParameters?: (params: QueryParameters) => void;
+  setVariables?: (variables: Variables) => void;
   // The public reader lives on the element's presenter, not the element itself.
-  presenter?: { getQueryParameters?: () => QueryParameters };
+  presenter?: { getVariables?: () => Variables };
 };
 
 /**
- * Set the CX session parameter "country" on the chat-messenger widget so the
- * Conversational Agent receives "Georgia" or "Italy".
+ * Set the CX session variable "country" on the chat-messenger widget so the
+ * Conversational Agent (CES deployment) receives "Georgia" or "Italy".
+ *
+ * The CES request path sends `variables` (via setVariables/getVariables) with
+ * every message — NOT queryParameters, which only the Dialogflow path uses.
  */
 const setChatCountry = (country: Country) => {
   const apply = () => {
     const el = document.querySelector<ChatMessengerElement>("chat-messenger");
-    if (!el || typeof el.setQueryParameters !== "function") return false;
+    if (!el || typeof el.setVariables !== "function") return false;
 
-    // Merge into existing query parameters so we don't clobber other params.
-    const current = el.presenter?.getQueryParameters?.() ?? {};
-    console.log("Current query parameters:", current);
-    el.setQueryParameters({
-      ...current,
-      parameters: {
-        ...current.parameters,
-        country: COUNTRY_VALUES[country],
-      },
-    });
-    console.log(
-      "Updated query parameters:",
-      el.presenter?.getQueryParameters?.(),
-    );
+    // Merge into existing variables so we don't clobber other CX variables.
+    const current = el.presenter?.getVariables?.() ?? {};
+    el.setVariables({ ...current, country: COUNTRY_VALUES[country] });
+    console.log("CX variables set to:", el.presenter?.getVariables?.());
     return true;
   };
 
