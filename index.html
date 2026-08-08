@@ -24,6 +24,23 @@
       rel="stylesheet"
       href="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/themes/chat-messenger-layout.css"
     />
+    <style>
+      /* Pin the chat as a floating panel in the bottom-right corner
+         so it stays in view without scrolling the page */
+      chat-messenger {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index: 999;
+        width: 400px;
+        max-width: calc(100vw - 40px);
+        height: 600px;
+        max-height: calc(100vh - 40px);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 12px 32px rgba(23, 7, 56, 0.35);
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
