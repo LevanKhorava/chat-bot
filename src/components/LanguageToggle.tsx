@@ -30,7 +30,7 @@ const LanguageToggle = () => {
             : "text-white/80 hover:text-white"
         }`}
       >
-        ႥႤ
+        KA
       </button>
     </div>
   );
