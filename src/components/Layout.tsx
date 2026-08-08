@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import LanguageToggle from "./LanguageToggle";
+import CountrySelect from "./CountrySelect";
 
 const Layout = () => {
   const { t } = useTranslation();
@@ -22,12 +23,12 @@ const Layout = () => {
               <NavLink to="/" end className={linkClass}>
                 {t("nav.home")}
               </NavLink>
-              <NavLink to="/chat" className={linkClass}>
-                {t("nav.chat")}
-              </NavLink>
             </div>
           </div>
-          <LanguageToggle />
+          <div className="flex items-center gap-3">
+            <CountrySelect />
+            <LanguageToggle />
+          </div>
         </nav>
       </header>
 

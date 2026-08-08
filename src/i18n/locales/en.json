@@ -1,31 +1,23 @@
 {
   "nav": {
     "brand": "CX Chat",
-    "home": "Home",
-    "chat": "Chat"
+    "home": "Home"
   },
   "language": {
     "label": "Language",
     "en": "English",
     "ka": "ქართული"
   },
+  "country": {
+    "label": "Country",
+    "georgia": "Georgia",
+    "italy": "Italy"
+  },
   "home": {
     "title": "Welcome to CX Chat",
     "subtitle": "A tiny, friendly place to start a conversation.",
     "lead": "The quick brown fox jumps over the lazy dog while the coffee is still warm and the ideas keep flowing.",
     "paragraph1": "Every great chat begins with a simple hello. This page is just a playground for random thoughts, half-finished sentences, and the occasional brilliant idea that shows up unannounced.",
-    "paragraph2": "Somewhere between the first message and the last, a whole story gets written. We keep it light, we keep it curious, and we always leave room for one more question.",
-    "cta": "Go to Chat"
-  },
-  "chat": {
-    "title": "The Chat Room",
-    "subtitle": "Pretend messages, real vibes.",
-    "message1": "Hey there! Did you know octopuses have three hearts and blue blood?",
-    "message2": "No way. Meanwhile I still can't remember where I left my keys.",
-    "message3": "Classic. Let's change the subject before this gets philosophical.",
-    "message4": "Too late. Everything is philosophical after midnight.",
-    "placeholder": "Type a message (just for show)...",
-    "send": "Send",
-    "back": "Back to Home"
+    "paragraph2": "Somewhere between the first message and the last, a whole story gets written. We keep it light, we keep it curious, and we always leave room for one more question."
   }
 }

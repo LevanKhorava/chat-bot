@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 const HomePage = () => {
@@ -19,13 +18,6 @@ const HomePage = () => {
         <p>{t("home.paragraph1")}</p>
         <p>{t("home.paragraph2")}</p>
       </div>
-
-      <Link
-        to="/chat"
-        className="inline-block rounded-full bg-violet px-6 py-3 font-semibold text-white transition-opacity hover:opacity-90"
-      >
-        {t("home.cta")}
-      </Link>
     </section>
   );
 };
