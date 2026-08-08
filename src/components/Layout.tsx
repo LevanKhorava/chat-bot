@@ -1,0 +1,41 @@
+import { NavLink, Outlet } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import LanguageToggle from "./LanguageToggle";
+
+const Layout = () => {
+  const { t } = useTranslation();
+
+  const linkClass = ({ isActive }: { isActive: boolean }) =>
+    `text-sm font-medium transition-colors ${
+      isActive ? "text-white" : "text-white/70 hover:text-white"
+    }`;
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-aubergine">
+        <nav className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-6">
+            <span className="text-lg font-bold text-white">
+              {t("nav.brand")}
+            </span>
+            <div className="flex items-center gap-4">
+              <NavLink to="/" end className={linkClass}>
+                {t("nav.home")}
+              </NavLink>
+              <NavLink to="/chat" className={linkClass}>
+                {t("nav.chat")}
+              </NavLink>
+            </div>
+          </div>
+          <LanguageToggle />
+        </nav>
+      </header>
+
+      <main className="mx-auto max-w-3xl px-6 py-10">
+        <Outlet />
+      </main>
+    </div>
+  );
+};
+
+export default Layout;
