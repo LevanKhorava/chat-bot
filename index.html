@@ -25,9 +25,10 @@
       href="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/themes/chat-messenger-layout.css"
     />
     <style>
-      /* Pin the chat as a floating panel in the bottom-right corner
-         so it stays in view without scrolling the page */
-      chat-messenger {
+      /* Floating chat panel pinned to the bottom-right corner. The chat stays
+         mounted the whole time; we only toggle the wrapper's visibility so the
+         session (and the "country" variable) survives collapse/expand. */
+      #cx-chat-widget {
         position: fixed;
         right: 20px;
         bottom: 20px;
@@ -39,6 +40,77 @@
         border-radius: 16px;
         overflow: hidden;
         box-shadow: 0 12px 32px rgba(23, 7, 56, 0.35);
+        transition: opacity 0.2s ease;
+      }
+      /* Collapsed: hidden but kept in layout so the conversation's scroll
+         position is preserved when reopened (session stays alive). */
+      #cx-chat-widget.cx-collapsed {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+      chat-messenger {
+        width: 100%;
+        height: 100%;
+      }
+
+      /* Launcher icon shown when the chat is collapsed */
+      #cx-chat-launcher {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index: 1000;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 56px;
+        height: 56px;
+        padding: 0;
+        border: none;
+        border-radius: 9999px;
+        background: #6c63ff;
+        color: #fff;
+        cursor: pointer;
+        box-shadow: 0 8px 24px rgba(23, 7, 56, 0.4);
+        transition: transform 0.15s ease, background-color 0.15s ease;
+      }
+      #cx-chat-launcher:hover {
+        background: #5a52e0;
+        transform: translateY(-1px);
+      }
+      #cx-chat-launcher:focus-visible {
+        outline: 3px solid rgba(108, 99, 255, 0.5);
+        outline-offset: 2px;
+      }
+      #cx-chat-launcher[hidden] {
+        display: none;
+      }
+
+      /* Collapse (close) control sits at the panel's top-right corner */
+      #cx-chat-close {
+        position: absolute;
+        top: 10px;
+        right: 12px;
+        z-index: 2;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border: none;
+        border-radius: 9999px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #fff;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+      }
+      #cx-chat-close:hover {
+        background: rgba(255, 255, 255, 0.18);
+      }
+      #cx-chat-close:focus-visible {
+        outline: 2px solid rgba(255, 255, 255, 0.6);
+        outline-offset: 2px;
       }
     </style>
   </head>
@@ -59,27 +131,67 @@
         );
       });
     </script>
-    <!-- Update the url-allowlist attribute with a comma-separated list of origins allowed to render images -->
-    <chat-messenger url-allowlist="*" color-scheme="dark">
-      <chat-messenger-container
-        chat-title="Cymbal game"
-        chat-title-icon="https://gstatic.com/dialogflow-console/common/assets/ccai-favicons/conversational_agents.png"
-        enable-file-upload
+
+    <!-- Launcher icon: opens the chat -->
+    <button id="cx-chat-launcher" type="button" aria-label="Open chat">
+      <svg
+        width="26"
+        height="26"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
       >
-        <chat-reset-session-button
-          slot="titlebar-actions"
-          title-text="Start new chat"
-        ></chat-reset-session-button>
-        <chat-toggle-dialog-button
-          slot="titlebar-actions"
-          title-text-expanded="Collapse"
-          title-text-collapsed="Expand"
-        ></chat-toggle-dialog-button>
-        <chat-messenger-close-button
-          slot="titlebar-actions"
-          title-text="Close"
-        ></chat-messenger-close-button>
-      </chat-messenger-container>
-    </chat-messenger>
+        <path
+          d="M4 4h16a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H8l-4 4V5a1 1 0 0 1 1-1z"
+          fill="currentColor"
+        />
+      </svg>
+    </button>
+
+    <!-- Update the url-allowlist attribute with a comma-separated list of origins allowed to render images -->
+    <div id="cx-chat-widget" class="cx-collapsed">
+      <button id="cx-chat-close" type="button" aria-label="Close chat">
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <path
+            d="M6 6l12 12M18 6L6 18"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+        </svg>
+      </button>
+      <chat-messenger url-allowlist="*" color-scheme="dark">
+        <chat-messenger-container
+          chat-title="Cymbal game"
+          chat-title-icon="https://gstatic.com/dialogflow-console/common/assets/ccai-favicons/conversational_agents.png"
+          enable-file-upload
+        ></chat-messenger-container>
+      </chat-messenger>
+    </div>
+
+    <script>
+      // Toggle the chat between the launcher icon and the open panel.
+      (function () {
+        var widget = document.getElementById("cx-chat-widget");
+        var launcher = document.getElementById("cx-chat-launcher");
+        var closeBtn = document.getElementById("cx-chat-close");
+        launcher.addEventListener("click", function () {
+          widget.classList.remove("cx-collapsed");
+          launcher.hidden = true;
+        });
+        closeBtn.addEventListener("click", function () {
+          widget.classList.add("cx-collapsed");
+          launcher.hidden = false;
+        });
+      })();
+    </script>
   </body>
 </html>
