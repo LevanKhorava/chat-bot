@@ -9,9 +9,15 @@
     />
     <meta
       name="description"
-      content="CX Chat - a simple two-page demo app with English/Georgian toggle."
+      content="Ventis - Fashion, Home Design & Lifestyle. Shop live with a stylist in English or Georgian."
     />
-    <title>CX Chat</title>
+    <title>Ventis — Fashion, Home Design & Lifestyle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    />
     <script
       defer
       src="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/chat-messenger.js"
@@ -39,7 +45,7 @@
         max-height: calc(100vh - 40px);
         border-radius: 16px;
         overflow: hidden;
-        box-shadow: 0 12px 32px rgba(23, 7, 56, 0.35);
+        box-shadow: 0 12px 32px rgba(17, 17, 17, 0.28);
         transition: opacity 0.2s ease;
       }
       /* Collapsed: hidden but kept in layout so the conversation's scroll
@@ -68,18 +74,20 @@
         padding: 0;
         border: none;
         border-radius: 9999px;
-        background: #6c63ff;
-        color: #fff;
+        background: #18d0b2;
+        color: #1a1a1a;
         cursor: pointer;
-        box-shadow: 0 8px 24px rgba(23, 7, 56, 0.4);
-        transition: transform 0.15s ease, background-color 0.15s ease;
+        box-shadow: 0 8px 24px rgba(2, 79, 84, 0.35);
+        transition:
+          transform 0.15s ease,
+          background-color 0.15s ease;
       }
       #cx-chat-launcher:hover {
-        background: #5a52e0;
+        background: #12b39c;
         transform: translateY(-1px);
       }
       #cx-chat-launcher:focus-visible {
-        outline: 3px solid rgba(108, 99, 255, 0.5);
+        outline: 3px solid rgba(24, 208, 178, 0.45);
         outline-offset: 2px;
       }
       #cx-chat-launcher[hidden] {
@@ -100,16 +108,16 @@
         padding: 0;
         border: none;
         border-radius: 9999px;
-        background: rgba(255, 255, 255, 0.08);
-        color: #fff;
+        background: rgba(0, 0, 0, 0.06);
+        color: #1a1a1a;
         cursor: pointer;
         transition: background-color 0.15s ease;
       }
       #cx-chat-close:hover {
-        background: rgba(255, 255, 255, 0.18);
+        background: rgba(0, 0, 0, 0.12);
       }
       #cx-chat-close:focus-visible {
-        outline: 2px solid rgba(255, 255, 255, 0.6);
+        outline: 2px solid rgba(24, 208, 178, 0.6);
         outline-offset: 2px;
       }
     </style>
@@ -122,7 +130,7 @@
         chatSdk.registerContext(
           chatSdk.prebuilts.ces.createContext({
             deploymentName:
-              "projects/59368594337/locations/us/apps/ce260e66-55a0-418a-9361-2e084bc8cd4d/deployments/31513ef8-4554-486f-a4ce-f16fee59ea2d",
+              "projects/660780940216/locations/eu/apps/6308cd9f-f98f-4e32-a9b4-9ff8388df9b2/deployments/ceaf5d81-5e70-4b2d-bb22-0af34e723c8c",
             tokenBroker: {
               enableTokenBroker: true,
               enableRecaptcha: false,
@@ -168,11 +176,12 @@
           />
         </svg>
       </button>
-      <chat-messenger url-allowlist="*" color-scheme="dark">
+      <chat-messenger url-allowlist="*" color-scheme="light">
         <chat-messenger-container
-          chat-title="Cymbal game"
+          chat-title="VENTIS"
           chat-title-icon="https://gstatic.com/dialogflow-console/common/assets/ccai-favicons/conversational_agents.png"
           enable-file-upload
+          enable-audio-input
         ></chat-messenger-container>
       </chat-messenger>
     </div>

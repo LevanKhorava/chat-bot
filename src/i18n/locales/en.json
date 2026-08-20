@@ -1,6 +1,6 @@
 {
   "nav": {
-    "brand": "CX Chat",
+    "brand": "Ventis",
     "home": "Home"
   },
   "language": {
@@ -14,7 +14,7 @@
     "italy": "Italy"
   },
   "home": {
-    "title": "Welcome to CX Chat",
+    "title": "Welcome to Ventis",
     "subtitle": "A tiny, friendly place to start a conversation.",
     "lead": "The quick brown fox jumps over the lazy dog while the coffee is still warm and the ideas keep flowing.",
     "paragraph1": "Every great chat begins with a simple hello. This page is just a playground for random thoughts, half-finished sentences, and the occasional brilliant idea that shows up unannounced.",

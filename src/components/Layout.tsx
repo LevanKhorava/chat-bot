@@ -7,16 +7,18 @@ const Layout = () => {
   const { t } = useTranslation();
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
-    `text-sm font-medium transition-colors ${
-      isActive ? "text-white" : "text-white/70 hover:text-white"
+    `text-xs font-medium uppercase tracking-[0.15em] transition-colors ${
+      isActive
+        ? "text-ink border-b-2 border-brand pb-1"
+        : "text-muted hover:text-ink"
     }`;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-aubergine">
-        <nav className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-6">
-            <span className="text-lg font-bold text-white">
+    <div className="min-h-screen bg-white text-ink">
+      <header className="border-b border-line bg-white">
+        <nav className="mx-auto flex max-w-3xl items-center justify-between px-6 py-5">
+          <div className="flex items-center gap-8">
+            <span className="text-xl font-extrabold uppercase tracking-[0.3em] text-ink">
               {t("nav.brand")}
             </span>
             <div className="flex items-center gap-4">
@@ -32,7 +34,7 @@ const Layout = () => {
         </nav>
       </header>
 
-      <main className="mx-auto max-w-3xl px-6 py-10">
+      <main className="mx-auto max-w-3xl px-6 py-12">
         <Outlet />
       </main>
     </div>

@@ -9,14 +9,14 @@ const LanguageToggle = () => {
   };
 
   return (
-    <div className="flex items-center gap-1 rounded-full bg-white/10 p-1">
+    <div className="flex items-center border border-line">
       <button
         type="button"
         onClick={() => changeLanguage("en")}
-        className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
+        className={`px-3 py-1.5 text-xs font-medium uppercase tracking-[0.1em] transition-colors ${
           current === "en"
-            ? "bg-white text-aubergine"
-            : "text-white/80 hover:text-white"
+            ? "bg-ink text-white"
+            : "text-muted hover:text-ink"
         }`}
       >
         EN
@@ -24,10 +24,10 @@ const LanguageToggle = () => {
       <button
         type="button"
         onClick={() => changeLanguage("ka")}
-        className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
+        className={`px-3 py-1.5 text-xs font-medium uppercase tracking-[0.1em] transition-colors ${
           current === "ka"
-            ? "bg-white text-aubergine"
-            : "text-white/80 hover:text-white"
+            ? "bg-ink text-white"
+            : "text-muted hover:text-ink"
         }`}
       >
         KA

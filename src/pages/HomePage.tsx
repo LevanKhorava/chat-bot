@@ -4,17 +4,19 @@ const HomePage = () => {
   const { t } = useTranslation();
 
   return (
-    <section className="animate-fade-in space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-aubergine">{t("home.title")}</h1>
-        <p className="text-lg text-gray-500">{t("home.subtitle")}</p>
+    <section className="animate-fade-in space-y-8">
+      <div className="space-y-3">
+        <h1 className="text-4xl font-extrabold uppercase tracking-tight text-ink">
+          {t("home.title")}
+        </h1>
+        <p className="text-lg text-muted">{t("home.subtitle")}</p>
       </div>
 
-      <p className="rounded-2xl bg-violet/10 p-5 text-lg font-medium italic text-violet">
+      <blockquote className="border-l-2 border-brand bg-paper p-5 text-lg font-medium italic text-ink">
         “{t("home.lead")}”
-      </p>
+      </blockquote>
 
-      <div className="space-y-4 text-gray-700 leading-relaxed">
+      <div className="space-y-4 leading-relaxed text-ink/80">
         <p>{t("home.paragraph1")}</p>
         <p>{t("home.paragraph2")}</p>
       </div>
