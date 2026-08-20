@@ -3,21 +3,9 @@
     "brand": "Ventis",
     "home": "Home"
   },
-  "language": {
-    "label": "Language",
-    "en": "English",
-    "ka": "ქართული"
-  },
   "country": {
     "label": "Country",
     "georgia": "Georgia",
     "italy": "Italy"
-  },
-  "home": {
-    "title": "Welcome to Ventis",
-    "subtitle": "A tiny, friendly place to start a conversation.",
-    "lead": "The quick brown fox jumps over the lazy dog while the coffee is still warm and the ideas keep flowing.",
-    "paragraph1": "Every great chat begins with a simple hello. This page is just a playground for random thoughts, half-finished sentences, and the occasional brilliant idea that shows up unannounced.",
-    "paragraph2": "Somewhere between the first message and the last, a whole story gets written. We keep it light, we keep it curious, and we always leave room for one more question."
   }
 }
