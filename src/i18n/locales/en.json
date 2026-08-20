@@ -4,8 +4,6 @@
     "home": "Home"
   },
   "country": {
-    "label": "Country",
-    "georgia": "Georgia",
-    "italy": "Italy"
+    "label": "Country"
   }
 }

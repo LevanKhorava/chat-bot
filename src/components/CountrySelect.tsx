@@ -1,13 +1,47 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-type Country = "georgia" | "italy";
+// Countries shown in the selector (order matches the storefront: key markets
+// first, then alphabetical).
+const COUNTRIES = [
+  "Italy",
+  "Germany",
+  "France",
+  "Spain",
+  "Netherlands",
+  "Austria",
+  "Belgium",
+  "Brazil",
+  "Bulgaria",
+  "Canada",
+  "Croatia",
+  "Cuba",
+  "Czech Republic",
+  "Denmark",
+  "Estonia",
+  "Finland",
+  "Greece",
+  "Hungary",
+  "Ireland",
+  "Latvia",
+  "Lithuania",
+  "Luxembourg",
+  "Mexico",
+  "Poland",
+  "Portugal",
+  "Romania",
+  "Slovakia",
+  "Slovenia",
+  "Sweden",
+  "United States of America",
+] as const;
 
-// Value passed to the CX agent's "country" variable.
-const COUNTRY_VALUES: Record<Country, string> = {
-  georgia: "ie_en",
-  italy: "it_it",
-};
+type Country = (typeof COUNTRIES)[number];
+
+// Value passed to the CX agent's "country" variable: Italy shops in Italian
+// (it_it); every other country falls back to the Ireland/English locale (ie_en).
+const localeFor = (country: Country): string =>
+  country === "Italy" ? "it_it" : "ie_en";
 
 type Variables = Record<string, unknown>;
 
@@ -40,7 +74,7 @@ const startNewChatSession = (el: ChatMessengerElement): string => {
     return "presenter";
   }
   el.dispatchEvent(
-    new CustomEvent("chat-messenger-start-new-session", { bubbles: true })
+    new CustomEvent("chat-messenger-start-new-session", { bubbles: true }),
   );
   window.dispatchEvent(new CustomEvent("chat-messenger-start-new-session"));
   return "event";
@@ -60,7 +94,7 @@ const startNewChatSession = (el: ChatMessengerElement): string => {
  */
 const setChatCountry = (
   country: Country,
-  { startNewSession }: { startNewSession: boolean }
+  { startNewSession }: { startNewSession: boolean },
 ) => {
   const apply = () => {
     const el = document.querySelector<ChatMessengerElement>("chat-messenger");
@@ -77,8 +111,11 @@ const setChatCountry = (
 
     // Runs synchronously right after startNewSession, so the country is stored
     // before the new session sends anything over the wire.
-    el.setVariables({ ...previous, country: COUNTRY_VALUES[country] });
-    console.log("CX variables set to:", el.presenter?.getVariables?.());
+    const next = { ...previous, country: localeFor(country) };
+    el.setVariables(next);
+    // Log the value we set — the presenter's getVariables() reader lags one
+    // write behind, so it would report a stale value here.
+    console.log("CX variables set to:", next);
     return true;
   };
 
@@ -92,7 +129,7 @@ const setChatCountry = (
 
 const CountrySelect = () => {
   const { t } = useTranslation();
-  const [country, setCountry] = useState<Country>("georgia");
+  const [country, setCountry] = useState<Country>("Italy");
   // Only reset the session on an actual user change — not on the initial mount,
   // which would needlessly discard a session that survived a page reload.
   const isInitialMount = useRef(true);
@@ -110,12 +147,11 @@ const CountrySelect = () => {
       onChange={(e) => setCountry(e.target.value as Country)}
       className="cursor-pointer rounded-none border border-line bg-white px-3 py-1.5 text-xs font-medium uppercase tracking-[0.1em] text-ink outline-none transition-colors hover:border-ink focus:border-brand focus:ring-2 focus:ring-brand/30"
     >
-      <option value="georgia" className="text-ink">
-        🇬🇪 {t("country.georgia")}
-      </option>
-      <option value="italy" className="text-ink">
-        🇮🇹 {t("country.italy")}
-      </option>
+      {COUNTRIES.map((c) => (
+        <option key={c} value={c} className="text-ink">
+          {c}
+        </option>
+      ))}
     </select>
   );
 };
