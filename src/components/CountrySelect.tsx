@@ -39,9 +39,13 @@ const COUNTRIES = [
 type Country = (typeof COUNTRIES)[number];
 
 // Value passed to the CX agent's "country" variable: Italy shops in Italian
-// (it_it); every other country falls back to the Ireland/English locale (ie_en).
-const localeFor = (country: Country): string =>
-  country === "Italy" ? "it_it" : "ie_en";
+// (it_it); the US shops in US English (us_en); every other country falls
+// back to the Ireland/English locale (ie_en).
+const localeFor = (country: Country): string => {
+  if (country === "Italy") return "it_it";
+  if (country === "United States of America") return "us_en";
+  return "ie_en";
+};
 
 type Variables = Record<string, unknown>;
 
