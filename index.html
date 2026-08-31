@@ -220,5 +220,45 @@
         });
       })();
     </script>
+
+    <script>
+      // The chat-messenger SDK only supports uploading images via its own
+      // upload button; it doesn't listen for clipboard paste. This forwards a
+      // pasted image to the SDK's hidden file input so paste-to-upload works.
+      (function () {
+        function findFileInput(root) {
+          if (!root) return null;
+          var direct = root.querySelector && root.querySelector('input[type="file"]');
+          if (direct) return direct;
+          var nodes = root.querySelectorAll ? root.querySelectorAll("*") : [];
+          for (var i = 0; i < nodes.length; i++) {
+            var el = nodes[i];
+            if (el.shadowRoot) {
+              var found = findFileInput(el.shadowRoot);
+              if (found) return found;
+            }
+          }
+          return null;
+        }
+
+        document.addEventListener("paste", function (e) {
+          var items = e.clipboardData && e.clipboardData.items;
+          if (!items) return;
+          var imgItem = Array.prototype.find.call(items, function (i) {
+            return i.type && i.type.indexOf("image/") === 0;
+          });
+          if (!imgItem) return;
+          var file = imgItem.getAsFile();
+          if (!file) return;
+          var input = findFileInput(document);
+          if (!input) return;
+          var dt = new DataTransfer();
+          dt.items.add(file);
+          input.files = dt.files;
+          input.dispatchEvent(new Event("change", { bubbles: true }));
+          e.preventDefault();
+        });
+      })();
+    </script>
   </body>
 </html>
