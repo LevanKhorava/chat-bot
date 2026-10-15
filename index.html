@@ -194,7 +194,11 @@
           />
         </svg>
       </button>
-      <chat-messenger url-allowlist="*" color-scheme="light">
+      <chat-messenger
+        url-allowlist="https://www.ventis.com,https://ik.imagekit.io,https://help.scalapay.com"
+        color-scheme="light"
+        max-query-length="1000"
+      >
         <chat-messenger-container
           chat-title="VENTIS"
           chat-title-icon="https://gstatic.com/dialogflow-console/common/assets/ccai-favicons/conversational_agents.png"
@@ -228,7 +232,8 @@
       (function () {
         function findFileInput(root) {
           if (!root) return null;
-          var direct = root.querySelector && root.querySelector('input[type="file"]');
+          var direct =
+            root.querySelector && root.querySelector('input[type="file"]');
           if (direct) return direct;
           var nodes = root.querySelectorAll ? root.querySelectorAll("*") : [];
           for (var i = 0; i < nodes.length; i++) {
