@@ -175,7 +175,8 @@
       </svg>
     </button>
 
-    <!-- Update the url-allowlist attribute with a comma-separated list of origins allowed to render images -->
+    <!-- Update the url-allowlist attribute with a comma-separated list of origins allowed to render images.
+         blob: and data: are needed so images the user uploads/pastes render in the sent message bubble. -->
     <div id="cx-chat-widget" class="cx-collapsed">
       <button id="cx-chat-close" type="button" aria-label="Close chat">
         <svg
@@ -195,7 +196,7 @@
         </svg>
       </button>
       <chat-messenger
-        url-allowlist="https://www.ventis.com,https://ik.imagekit.io,https://help.scalapay.com"
+        url-allowlist="https://www.ventis.com,https://ik.imagekit.io,https://help.scalapay.com,blob:,data:"
         color-scheme="light"
         max-query-length="1000"
       >
