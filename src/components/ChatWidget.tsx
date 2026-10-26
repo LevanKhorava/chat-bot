@@ -8,18 +8,18 @@ const SDK_BASE = "https://www.gstatic.com/chat-messenger/sdk/prod/v1.16";
 const DEPLOYMENT_NAME =
   "projects/660780940216/locations/eu/apps/6308cd9f-f98f-4e32-a9b4-9ff8388df9b2/deployments/ceaf5d81-5e70-4b2d-bb22-0af34e723c8c";
 
-// ID of the client-side tool the agent calls once the shopper settles on a
-// product: the last segment of the tool's resource name
-// (projects/…/apps/…/tools/<id>). The SDK routes CES tool calls to browser
-// handlers by this ID, so it must match the tool in the CES app exactly.
-const SELECT_PRODUCT_TOOL_ID = "select_product";
+// Function name of the client-side tool the agent calls once the shopper
+// settles on a product. registerClientSideFunctionForAllTools matches CES tool
+// calls by function name (not tool ID), so this must match the function name in
+// the CES app exactly. The tool only exists on the test app/deployment.
+const SELECT_PRODUCT_FUNCTION = "select_product";
 
 type ClientSideFunction = (args: Record<string, unknown>) => unknown;
 
 type ChatMessengerElement = HTMLElement & {
   presenter?: {
     registerClientSideFunctionForAllTools?: (
-      toolId: string,
+      functionName: string,
       handler: ClientSideFunction,
     ) => void;
   };
@@ -93,23 +93,44 @@ const registerCesContext = () => {
 
 // Runs in the browser when the agent calls the select_product tool. The SDK
 // sends the return value back to the agent as the tool response, which is how
-// the agent learns the checkout link to show the shopper.
+// the agent learns the checkout link to show the shopper. On failure we return
+// status "error" and the agent tells the customer.
+//
+// The link uses this page's origin, so it must be on the agent's approved
+// domain list or the agent strips it from the reply (localhost isn't).
 const selectProduct: ClientSideFunction = (args) => {
-  const product = saveSelectedProduct(args);
-  console.log("CX product selected:", product);
-  return { status: "saved", checkoutUrl: `${window.location.origin}/checkout` };
+  if (typeof args.name !== "string" || !args.name) {
+    return { status: "error", message: "Missing product name" };
+  }
+  try {
+    const product = saveSelectedProduct(args);
+    console.log("CX product selected:", product);
+    return {
+      status: "saved",
+      checkoutUrl: `${window.location.origin}/checkout`,
+    };
+  } catch (err) {
+    // localStorage can throw (private browsing, storage blocked or full).
+    console.error("CX product could not be saved:", err);
+    return { status: "error", message: "Could not save the selected product" };
+  }
 };
 
 // The presenter (and its client-function registry) is created when
 // <chat-messenger> connects and survives startNewSession(), so registering once
 // on load is enough.
 const registerClientTools = () => {
-  document
-    .querySelector<ChatMessengerElement>("chat-messenger")
-    ?.presenter?.registerClientSideFunctionForAllTools?.(
-      SELECT_PRODUCT_TOOL_ID,
-      selectProduct,
-    );
+  const presenter =
+    document.querySelector<ChatMessengerElement>("chat-messenger")?.presenter;
+  if (!presenter?.registerClientSideFunctionForAllTools) {
+    // Without this the agent's select_product calls go nowhere, silently.
+    console.warn(`CX: could not register "${SELECT_PRODUCT_FUNCTION}"`);
+    return;
+  }
+  presenter.registerClientSideFunctionForAllTools(
+    SELECT_PRODUCT_FUNCTION,
+    selectProduct,
+  );
 };
 
 const onChatLoaded = () => {

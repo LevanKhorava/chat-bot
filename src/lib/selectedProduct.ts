@@ -11,10 +11,13 @@ const STORAGE_KEY = "cx-selected-product";
 // SelectedProduct.
 export const PRODUCT_SELECTED_EVENT = "cx-product-selected";
 
-// Mirrors the tool's parameter schema in the CES app. Every arg the agent sends
-// is stored, so extra fields survive even if they aren't listed here.
+// Mirrors the tool's parameter schema in the CES app. The values come from the
+// Ventis catalogue, not typed by the model. Every arg the agent sends is
+// stored, so extra fields survive even if they aren't listed here.
 export type SelectedProduct = {
   id?: string;
+  // Per-size product code the real Ventis cart uses.
+  sku?: string;
   name: string;
   price?: string;
   imageUrl?: string;

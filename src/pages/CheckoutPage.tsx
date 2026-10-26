@@ -84,6 +84,7 @@ const CheckoutPage = () => {
   const details = [
     product.size && `Size ${product.size}`,
     product.color,
+    product.sku && `SKU ${product.sku}`,
   ].filter(Boolean);
 
   return (
