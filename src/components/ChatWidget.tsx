@@ -220,7 +220,7 @@ const ChatWidget = () => {
           </svg>
         </button>
         <chat-messenger
-          // url-allowlist="https://www.ventis.com,https://ik.imagekit.io,https://help.scalapay.com,blob:,data:"
+          url-allowlist="https://www.ventis.com,https://ik.imagekit.io,https://chat-bot-seven-rust.vercel.app, https://help.scalapay.com,blob:,data:"
           color-scheme="light"
           max-query-length="1000"
         >
