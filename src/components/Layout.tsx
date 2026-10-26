@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import ChatWidget from "./ChatWidget";
 import CountrySelect from "./CountrySelect";
 import { openChat } from "../lib/chat";
 
@@ -115,6 +116,8 @@ const Layout = () => {
           </p>
         </div>
       </footer>
+
+      <ChatWidget />
     </div>
   );
 };

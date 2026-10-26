@@ -123,8 +123,9 @@ const setChatCountry = (
     return true;
   };
 
-  // The <chat-messenger> element lives in index.html and is defined by the SDK
-  // script, which may finish loading after React mounts. Retry until it's ready.
+  // The <chat-messenger> element is rendered by ChatWidget and defined by the
+  // SDK script it injects, which finishes loading after React mounts. Retry
+  // until it's ready.
   if (apply()) return;
   window.customElements?.whenDefined("chat-messenger").then(() => {
     if (!apply()) window.setTimeout(apply, 300);
