@@ -8,10 +8,15 @@ const SDK_BASE = "https://www.gstatic.com/chat-messenger/sdk/prod/v1.16";
 const DEPLOYMENT_NAME =
   "projects/660780940216/locations/eu/apps/6308cd9f-f98f-4e32-a9b4-9ff8388df9b2/deployments/ceaf5d81-5e70-4b2d-bb22-0af34e723c8c";
 
-// Function name of the client-side tool the agent calls once the shopper
-// settles on a product. registerClientSideFunctionForAllTools matches CES tool
-// calls by function name (not tool ID), so this must match the function name in
-// the CES app exactly. The tool only exists on the test app/deployment.
+// The client-side tool the agent calls once the shopper settles on a product.
+// It only exists on the test app/deployment. Full resource name:
+// projects/660780940216/locations/eu/apps/6308cd9f-f98f-4e32-a9b4-9ff8388df9b2/tools/b1a7c000-0000-4000-8000-000000000004
+//
+// SDK v1.16 looks registerClientSideFunctionForAllTools handlers up by the last
+// segment of that resource name (the tool ID), never by display name, so the ID
+// is the key that actually matches. The display name is registered too in case
+// the SDK starts matching by function name.
+const SELECT_PRODUCT_TOOL_ID = "b1a7c000-0000-4000-8000-000000000004";
 const SELECT_PRODUCT_FUNCTION = "select_product";
 
 type ClientSideFunction = (args: Record<string, unknown>) => unknown;
@@ -127,10 +132,9 @@ const registerClientTools = () => {
     console.warn(`CX: could not register "${SELECT_PRODUCT_FUNCTION}"`);
     return;
   }
-  presenter.registerClientSideFunctionForAllTools(
-    SELECT_PRODUCT_FUNCTION,
-    selectProduct,
-  );
+  for (const key of [SELECT_PRODUCT_TOOL_ID, SELECT_PRODUCT_FUNCTION]) {
+    presenter.registerClientSideFunctionForAllTools(key, selectProduct);
+  }
 };
 
 const onChatLoaded = () => {
