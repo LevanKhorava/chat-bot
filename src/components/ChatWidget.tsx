@@ -1,13 +1,17 @@
 import { useEffect } from "react";
 import type { DetailedHTMLProps, HTMLAttributes } from "react";
 import { closeChat, openChat } from "../lib/chat";
-import { saveSelectedProduct } from "../lib/selectedProduct";
+// TEMP select_product disabled
+// import { saveSelectedProduct } from "../lib/selectedProduct";
+// Defines <ventis-product-card>, which the agent's custom_template messages render.
+import "./ventisProductCard";
 
 const SDK_BASE = "https://www.gstatic.com/chat-messenger/sdk/prod/v1.16";
 
 const DEPLOYMENT_NAME =
   "projects/660780940216/locations/eu/apps/6308cd9f-f98f-4e32-a9b4-9ff8388df9b2/deployments/ceaf5d81-5e70-4b2d-bb22-0af34e723c8c";
 
+/* TEMP select_product disabled (remove this wrapper to re-enable)
 // The client-side tool the agent calls once the shopper settles on a product.
 // It only exists on the test app/deployment. Full resource name:
 // projects/660780940216/locations/eu/apps/6308cd9f-f98f-4e32-a9b4-9ff8388df9b2/tools/b1a7c000-0000-4000-8000-000000000004
@@ -29,6 +33,7 @@ type ChatMessengerElement = HTMLElement & {
     ) => void;
   };
 };
+*/
 
 type ChatSdk = {
   registerContext: (context: unknown) => void;
@@ -96,6 +101,7 @@ const registerCesContext = () => {
   );
 };
 
+/* TEMP select_product disabled (remove this wrapper to re-enable)
 // Runs in the browser when the agent calls the select_product tool. The SDK
 // sends the return value back to the agent as the tool response, which is how
 // the agent learns the checkout link to show the shopper. On failure we return
@@ -136,10 +142,11 @@ const registerClientTools = () => {
     presenter.registerClientSideFunctionForAllTools(key, selectProduct);
   }
 };
+*/
 
 const onChatLoaded = () => {
   registerCesContext();
-  registerClientTools();
+  // registerClientTools(); // TEMP select_product disabled
 };
 
 const findFileInput = (
