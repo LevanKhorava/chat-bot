@@ -3,8 +3,10 @@ import type { DetailedHTMLProps, HTMLAttributes } from "react";
 import { closeChat, openChat } from "../lib/chat";
 // TEMP select_product disabled
 // import { saveSelectedProduct } from "../lib/selectedProduct";
-// Defines <ventis-product-card>, which the agent's custom_template messages render.
-import "./ventisProductCard";
+// Defines <ventis-product-card> and <ventis-suggestions>, which the agent's
+// custom_template messages render. Kept exactly as Ventis sends it, so a new
+// version can be dropped in as-is.
+import "./ventis-product-card.js";
 
 const SDK_BASE = "https://www.gstatic.com/chat-messenger/sdk/prod/v1.16";
 
