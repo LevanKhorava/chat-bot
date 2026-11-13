@@ -1,145 +1,132 @@
 /* Ventis chat components for the chat widget (chat-messenger v1.16, custom_template rich content).
-   Load once per page (site + the apps' chat page), before cards arrive. Approved design 2026-11-06.
+   Design: Ventis third-round feedback, 9 Nov 2026 ("FEEDBACK CX CHAT AGENT – THIRD ROUND").
+   Load once per page (site + the apps' chat page). Defines <ventis-product-card> and <ventis-suggestions>.
 
    The agent sends, per product card:
      {type:"custom_template", name:"ventis-product-card", payload:{
-        n, title, price, old, disc, brand, sizes, image, url,
-        labels:{view, sizes, oneSize, more} }}
-     - sizes: an array (["40","41"]) or a plain string; ["Unica"] shows labels.oneSize
-     - labels.more contains "{n}", e.g. "e altre {n}" / "and {n} more"
-   and, for the recommendations block:
+        title, brand, price, old, disc, sizes, image, url, labels:{view, sizes} }}
+     - sizes: a list (["41","42"]) or a string; empty / ["OS"] / ["Unica"] -> no sizes row (Home Design)
+   and, once per reply, the recommendations:
      {type:"custom_template", name:"ventis-suggestions", payload:{
-        heading, items:[{title, brand, price, image, url}], labels:{view} }}
-   All texts come from the agent, already in the chat's language. Links/images must be https.
+        heading, items:[{title, brand, price, old, disc, url}], labels:{view} }}
+   All texts come from the agent in the chat's language. Links/images must be https.
+   The widget font (Inter) is set on the page; these components inherit it.
    Wishlist (heart) button: to be added when Ventis provides a wishlist API. */
 (function () {
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const safeUrl = u => /^https:\/\//i.test(String(u || '')) ? esc(u) : '';
-  const MAX_SIZES = 8;
+  const ARROW = `<svg class="arr" width="13" height="13" viewBox="0 0 13 13" aria-hidden="true">
+    <path d="M3.5 9.5l6-6M4.5 3.5h5v5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>`;
 
-  // Paint the image box in the photo's own edge colour, so any background colour blends in.
-  function matchBackground(img, box) {
-    try {
-      const w = 32, h = 32, c = document.createElement('canvas'); c.width = w; c.height = h;
-      const x = c.getContext('2d', {willReadFrequently: true}); x.drawImage(img, 0, 0, w, h);
-      const d = x.getImageData(0, 0, w, h).data, px = [];
-      for (let i = 0; i < w; i++) px.push(i, (h - 1) * w + i);
-      for (let j = 1; j < h - 1; j++) px.push(j * w, j * w + w - 1);
-      let r = 0, g = 0, b = 0; px.forEach(k => { r += d[k*4]; g += d[k*4+1]; b += d[k*4+2]; });
-      r /= px.length; g /= px.length; b /= px.length;
-      let dev = 0; px.forEach(k => { dev += Math.abs(d[k*4]-r) + Math.abs(d[k*4+1]-g) + Math.abs(d[k*4+2]-b); });
-      if (dev / px.length < 24) { box.style.background = `rgb(${r|0},${g|0},${b|0})`; img.style.mixBlendMode = 'normal'; }
-    } catch (e) { /* no pixel access: keep the default grey + blend */ }
+  function sizeList(s) {
+    const list = Array.isArray(s) ? s : String(s || '').split(/\s*[,·]\s*/);
+    const clean = list.map(x => String(x).trim()).filter(Boolean);
+    if (!clean.length || (clean.length === 1 && /^(os|unica|one size|tu|taglia unica)$/i.test(clean[0]))) return [];
+    return clean;
   }
-  function wireImages(root) {
-    root.querySelectorAll('img').forEach(im => {
-      const box = im.parentElement;
-      if (im.complete && im.naturalWidth) matchBackground(im, box);
-      else im.addEventListener('load', () => matchBackground(im, box), {once: true});
-    });
-  }
-  function sizesText(p, L) {
-    const s = p.sizes;
-    if (Array.isArray(s)) {
-      if (!s.length) return '';
-      if (s.length === 1 && /^(unica|one size|os|tu)$/i.test(String(s[0]).trim())) return esc(L.oneSize || 'Taglia unica');
-      const shown = s.slice(0, MAX_SIZES).map(esc).join(', ');
-      const more = s.length - MAX_SIZES;
-      const moreText = more > 0 ? ` <span class="more">${esc((L.more || 'e altre {n}').replace('{n}', more))}</span>` : '';
-      return `${esc(L.sizes || 'Taglie disponibili')}: ${shown}${moreText}`;
-    }
-    return s ? `${esc(L.sizes || 'Taglie disponibili')}: ${esc(s)}` : '';
+  function priceRow(p, cls) {
+    return `<div class="prices ${cls}"><span class="price">${esc(p.price)}</span>${
+      p.old || p.disc ? `<span class="was">${p.old ? `<s class="old">${esc(p.old)}</s>` : ''}${
+        p.disc ? `<span class="disc">${esc(p.disc)}</span>` : ''}</span>` : ''}</div>`;
   }
 
-  if (!customElements.get('ventis-product-card')) {
-    customElements.define('ventis-product-card', class extends HTMLElement {
-      connectedCallback() {
-        if (this.shadowRoot) return;
-        const p = this.dfPayload || {}, L = p.labels || {};
-        const url = safeUrl(p.url), img = safeUrl(p.image), sz = sizesText(p, L);
-        this.attachShadow({mode: 'open'}).innerHTML = `
-          <style>
-            :host{display:block;font-family:inherit;margin:6px 0}
-            .card{background:#fff;border-radius:18px;padding:14px;box-shadow:0 1px 8px rgba(20,24,40,.06)}
-            .head{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px}
-            .num{flex:0 0 22px;height:22px;border-radius:7px;background:#eef1f6;color:#1d2340;
-                 display:flex;align-items:center;justify-content:center;font-weight:500;font-size:12px}
-            .title{font-weight:700;font-size:15px;line-height:22px;color:#111;min-width:0;overflow-wrap:anywhere;
-                   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-            .body{display:flex;gap:12px;align-items:center}
-            .imgbox{flex:0 0 38%;aspect-ratio:1/1;background:#f3f4f7;border-radius:12px;
-                    display:flex;align-items:center;justify-content:center;overflow:hidden}
-            .imgbox img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply}
-            .info{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
-            .prices{display:flex;align-items:baseline;flex-wrap:wrap;column-gap:6px;row-gap:4px}
-            .price{font-weight:700;font-size:17px;color:#111;white-space:nowrap}
-            .old{text-decoration:line-through;color:rgba(0,0,0,.38);font-size:12px;white-space:nowrap}
-            .disc{background:#e6f6ec;color:#137333;border-radius:999px;padding:2px 7px;font-weight:600;font-size:11.5px;white-space:nowrap}
-            .brand{color:#5f6368;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-            .sizes{background:#f5f6f8;border-radius:8px;padding:5px 8px}
-            .sizes .t{font-size:11.5px;color:#333;line-height:16px;overflow-wrap:anywhere;
-                      display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-            .more{color:#5f6368;font-weight:600;white-space:nowrap}
-            .cta{display:block;text-align:center;color:#fff;text-decoration:none;white-space:nowrap;overflow:hidden;
-                 text-overflow:ellipsis;background:linear-gradient(180deg,#2a3156 0%,#1b2140 100%);
-                 border-radius:12px;padding:8px;font-weight:600;font-size:13px;margin-top:2px}
-          </style>
-          <div class="card">
-            <div class="head">${p.n ? `<div class="num">${esc(p.n)}</div>` : ''}
-              <div class="title">${esc(p.title)}</div></div>
-            <div class="body">
-              ${img ? `<a class="imgbox" href="${url}" target="_blank" rel="noopener"><img crossorigin="anonymous" src="${img}" alt="${esc(p.title)}"></a>` : ''}
-              <div class="info">
-                <div class="prices"><span class="price">${esc(p.price)}</span>
-                  ${p.old ? `<span class="old">${esc(p.old)}</span>` : ''}
-                  ${p.disc ? `<span class="disc">${esc(p.disc)}</span>` : ''}</div>
-                ${p.brand ? `<div class="brand">${esc(p.brand)}</div>` : ''}
-                ${sz ? `<div class="sizes"><div class="t">${sz}</div></div>` : ''}
-                ${url ? `<a class="cta" href="${url}" target="_blank" rel="noopener">${esc(L.view || 'Vedi su VENTIS')} ↗</a>` : ''}
+  const CARD_CSS = `
+    :host{display:block;font-family:inherit;margin:0 0 16px}
+    .card{background:#fff;border-radius:12px;padding:16px}
+    .top{display:grid;grid-template-columns:42% minmax(0,1fr);column-gap:16px;align-items:start}
+    .img{width:100%;max-width:129px;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .img img{max-width:100%;max-height:100%;object-fit:contain}
+    .meta{min-width:0}
+    .brand{font-size:17px;font-weight:650;color:#191919;line-height:23px;text-transform:uppercase;overflow-wrap:anywhere}
+    .name{font-size:16px;font-weight:400;color:#454545;line-height:23px;overflow-wrap:anywhere}
+    .sizes{margin-top:14px;font-size:16px;font-weight:400;color:#626262;line-height:23px;overflow-wrap:anywhere}
+    .prices{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:10px;row-gap:4px;margin-top:8px}
+    .price{font-size:21px;font-weight:600;color:#191919;white-space:nowrap}
+    .was{display:inline-flex;align-items:baseline;gap:8px;white-space:nowrap}
+    .old{font-size:16px;font-weight:400;color:#707070}
+    .disc{font-size:16px;font-weight:500;color:#333;background:#EFEFEF;border-radius:4px;padding:1px 6px}
+    .link{margin-top:12px;text-align:right}
+    a.go{font-size:16px;font-weight:400;color:#626262;text-decoration:underline;text-decoration-color:#B5B5B5;
+         text-underline-offset:3px;white-space:nowrap}
+    .arr{width:13px;height:13px;margin-left:4px;vertical-align:-1px}
+    @media (max-width:375px){ .card{padding:12px} .top{column-gap:12px} .img{max-width:110px} }
+    /* Desktop (the chat is a floating panel, not full-screen): Ventis's spec is for mobile; same layout, ~12% smaller */
+    @media (min-width:601px){
+      :host{margin-bottom:12px} .card{padding:14px} .top{column-gap:14px}
+      .img{max-width:108px}
+      .brand{font-size:15px;line-height:20px} .name,.sizes{font-size:14px;line-height:20px}
+      .sizes{margin-top:12px} .price{font-size:18px} .old,a.go{font-size:14px}
+      .disc{font-size:14px;padding:0 5px} .link{margin-top:10px} .arr{width:11px;height:11px} }`;
+
+  const SUGG_CSS = `
+    :host{display:block;font-family:inherit;margin:8px 0 16px}
+    .heading{font-size:17px;font-weight:500;color:#333;line-height:24px;margin-bottom:16px}
+    .row{padding:16px 0;border-top:1px solid #DEDEDE}
+    .row.first{border-top:none;padding-top:0}
+    .l1{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+    .brand{font-size:17px;font-weight:600;color:#292929;line-height:24px;text-transform:uppercase;min-width:0;overflow-wrap:anywhere}
+    a.go{flex:0 0 auto;font-size:16px;font-weight:400;color:#626262;text-decoration:underline;text-decoration-color:#B5B5B5;
+         text-underline-offset:3px;white-space:nowrap}
+    .arr{width:13px;height:13px;margin-left:4px;vertical-align:-1px}
+    .name{font-size:16px;font-weight:400;color:#454545;line-height:24px;overflow-wrap:anywhere}
+    .prices{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:10px;row-gap:4px;margin-top:4px}
+    .price{font-size:18px;font-weight:600;color:#191919;white-space:nowrap}
+    .was{display:inline-flex;align-items:baseline;gap:8px;white-space:nowrap}
+    .old{font-size:16px;font-weight:400;color:#707070}
+    .disc{font-size:14px;font-weight:500;color:#000;border:1px solid #000;border-radius:4px;padding:0 5px;background:transparent}
+    @media (min-width:601px){
+      .heading{font-size:15px;line-height:20px;margin-bottom:12px} .row{padding:12px 0}
+      .brand{font-size:15px;line-height:20px} .name{font-size:14px;line-height:20px} a.go,.old{font-size:14px}
+      .price{font-size:16px} .disc{font-size:12px} .arr{width:11px;height:11px} }`;
+
+  function define(cardName, suggName) {
+    if (cardName && !customElements.get(cardName)) {
+      customElements.define(cardName, class extends HTMLElement {
+        connectedCallback() {
+          if (this.shadowRoot) return;
+          const p = this.dfPayload || {}, L = p.labels || {};
+          const url = safeUrl(p.url), img = safeUrl(p.image), sizes = sizeList(p.sizes);
+          this.attachShadow({mode: 'open'}).innerHTML = `<style>${CARD_CSS}</style>
+            <div class="card">
+              <div class="top">
+                ${img ? `<a class="img" href="${url}" target="_blank" rel="noopener"><img src="${img}" alt="${esc(p.title)}"></a>` : ''}
+                <div class="meta">
+                  ${p.brand ? `<div class="brand">${esc(p.brand)}</div>` : ''}
+                  <div class="name">${esc(p.title)}</div>
+                </div>
               </div>
-            </div>
-          </div>`;
-        wireImages(this.shadowRoot);
-      }
-    });
+              ${sizes.length ? `<div class="sizes">${esc(L.sizes || 'Taglie')}: ${sizes.map(esc).join(' · ')}</div>` : ''}
+              ${priceRow(p, '')}
+              ${url ? `<div class="link"><a class="go" href="${url}" target="_blank" rel="noopener">${esc(L.view || 'Vedi prodotto')}${ARROW}</a></div>` : ''}
+              <!-- Wishlist (heart) button: to be added when Ventis provides the wishlist API -->
+            </div>`;
+        }
+      });
+    }
+    if (suggName && !customElements.get(suggName)) {
+      customElements.define(suggName, class extends HTMLElement {
+        connectedCallback() {
+          if (this.shadowRoot) return;
+          const p = this.dfPayload || {}, L = p.labels || {};
+          const items = (Array.isArray(p.items) ? p.items : []).filter(it => safeUrl(it.url));
+          if (!items.length) return;
+          this.attachShadow({mode: 'open'}).innerHTML = `<style>${SUGG_CSS}</style>
+            ${p.heading ? `<div class="heading">${esc(p.heading)}</div>` : ''}
+            ${items.map((it, i) => `
+              <div class="row${i === 0 ? ' first' : ''}">
+                <div class="l1">
+                  <span class="brand">${esc(it.brand || '')}</span>
+                  <a class="go" href="${safeUrl(it.url)}" target="_blank" rel="noopener">${esc(L.view || 'Vedi')}${ARROW}</a>
+                </div>
+                <div class="name">${esc(it.title)}</div>
+                ${priceRow(it, '')}
+              </div>`).join('')}`;
+        }
+      });
+    }
   }
 
-  if (!customElements.get('ventis-suggestions')) {
-    customElements.define('ventis-suggestions', class extends HTMLElement {
-      connectedCallback() {
-        if (this.shadowRoot) return;
-        const p = this.dfPayload || {}, L = p.labels || {};
-        const items = (Array.isArray(p.items) ? p.items : []).filter(it => safeUrl(it.url));
-        if (!items.length) return;
-        this.attachShadow({mode: 'open'}).innerHTML = `
-          <style>
-            :host{display:block;font-family:inherit;margin:10px 0 6px}
-            .box{background:#fff;border-radius:18px;padding:12px 14px;box-shadow:0 1px 8px rgba(20,24,40,.06)}
-            .heading{font-weight:700;font-size:14px;color:#111;margin-bottom:6px}
-            .row{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid #f0f1f4}
-            .row:first-of-type{border-top:none}
-            .thumb{flex:0 0 44px;width:44px;height:44px;background:#f3f4f7;border-radius:10px;
-                   display:flex;align-items:center;justify-content:center;overflow:hidden}
-            .thumb img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply}
-            .txt{flex:1;min-width:0}
-            .t{font-weight:600;font-size:13px;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-            .s{font-size:12px;color:#5f6368;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-            .go{flex:0 0 auto;font-size:12px;font-weight:600;color:#1d2340;text-decoration:none;white-space:nowrap;
-                border:1px solid #d9dce3;border-radius:10px;padding:5px 10px}
-          </style>
-          <div class="box">
-            ${p.heading ? `<div class="heading">${esc(p.heading)}</div>` : ''}
-            ${items.map(it => `
-              <div class="row">
-                ${safeUrl(it.image) ? `<a class="thumb" href="${safeUrl(it.url)}" target="_blank" rel="noopener"><img crossorigin="anonymous" src="${safeUrl(it.image)}" alt="${esc(it.title)}"></a>` : ''}
-                <div class="txt"><div class="t">${esc(it.title)}</div>
-                  <div class="s">${[it.brand, it.price].filter(Boolean).map(esc).join(' · ')}</div></div>
-                <a class="go" href="${safeUrl(it.url)}" target="_blank" rel="noopener">${esc(L.view || 'Vedi')} ↗</a>
-              </div>`).join('')}
-          </div>`;
-        wireImages(this.shadowRoot);
-      }
-    });
-  }
+  window.VentisChatComponents = { define };        // e.g. for testing under other names
+  define('ventis-product-card', 'ventis-suggestions');
 })();
